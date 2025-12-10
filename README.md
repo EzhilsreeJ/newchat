@@ -198,3 +198,232 @@ plt.show()
 
 # RESULT:
  Thus, a single layer perceptron model is implemented using python to classify Iris data set.
+--------------------------------------------------------------------------------------------------------------------
+# exp3 Implementation of MLP for a non-linearly separable data
+# Aim
+To implement a perceptron for classification using Python
+# Algorithm :
+Step 1 : Initialize the input patterns for XOR Gate
+Step 2: Initialize the desired output of the XOR Gate
+Step 3: Initialize the weights for the 2 layer MLP with 2 Hidden neuron and 1 output neuron
+Step 3: Repeat the iteration until the losses become constant and minimum
+(i) Compute the output using forward pass output
+(ii) Compute the error
+(iii) Compute the change in weight ‘dw’ by using backward progatation algorithm.
+(iv) Modify the weight as per delta rule.
+(v) Append the losses in a list
+Step 4 : Test for the XOR patterns.
+
+# program
+```
+import numpy as np
+import pandas as pd
+import io
+import matplotlib.pyplot as plt
+x=np.array([[0,0,1,1],[0,1,0,1]])
+y=np.array([[0,1,1,0]])
+n_x=2
+n_y = 1
+n_h = 2
+m = x.shape[1]
+lr = 0.1
+np.random.seed(2)
+w1 = np.random.rand(n_h,n_x)   # Weight matrix for hidden layer
+w2 = np.random.rand(n_y,n_h)   # Weight matrix for output layer
+losses = []
+def sigmoid(z):
+    z= 1/(1+np.exp(-z))
+    return z
+def forward_prop(w1,w2,x):
+    z1 = np.dot(w1,x)
+    a1 = sigmoid(z1)
+    z2 = np.dot(w2,a1)
+    a2 = sigmoid(z2)
+    return z1,a1,z2,a2
+def back_prop(m,w1,w2,z1,a1,z2,a2,y):
+    dz2 = a2-y
+    dw2 = np.dot(dz2,a1.T)/m
+    dz1 = np.dot(w2.T,dz2) * a1*(1-a1)
+    dw1 = np.dot(dz1,x.T)/m
+    dw1 = np.reshape(dw1,w1.shape)
+    dw2 = np.reshape(dw2,w2.shape)
+    return dz2,dw2,dz1,dw1
+iterations = 10000
+for i in range(iterations):
+    z1,a1,z2,a2 = forward_prop(w1,w2,x)
+    loss = -(1/m)*np.sum(y*np.log(a2)+(1-y)*np.log(1-a2))
+    losses.append(loss)
+    da2,dw2,dz1,dw1 = back_prop(m,w1,w2,z1,a1,z2,a2,y)
+    w2 = w2-lr*dw2
+    w1 = w1-lr*dw1
+plt.plot(losses)
+plt.xlabel("EPOCHS")
+plt.ylabel("Loss value")
+def predict(w1,w2,input):
+    z1,a1,z2,a2 = forward_prop(w1,w2,test)
+    a2 = np.squeeze(a2)
+    if a2>=0.5:
+        print( [i[0] for i in input], 1)
+    else:
+        print( [i[0] for i in input], 0)
+print('Input',' Output')
+test=np.array([[1],[0]])
+predict(w1,w2,test)
+test=np.array([[1],[1]])
+predict(w1,w2,test)
+test=np.array([[0],[1]])
+predict(w1,w2,test)
+test=np.array([[0],[0]])
+predict(w1,w2,test)
+```
+<H3>Output:</H3>
+Plot of Losses:
+<img width="772" height="542" alt="image" src="https://github.com/user-attachments/assets/4f70dd73-0e24-47bd-b18d-d5fab5a9b8fd" />
+
+Final Output:
+<img width="799" height="305" alt="image" src="https://github.com/user-attachments/assets/7c070fa2-d2b6-4fd6-ab75-4eae88d7cb95" />
+
+<H3> Result:</H3>
+Thus, XOR classification problem can be solved using MLP in Python 
+
+----------------------------------------------------------------------------------------------------------------------------------
+# exp4-IMPLEMENTATION OF MLP WITH BACKPROPAGATION FOR MULTICLASSIFICATION
+# AIM :
+To implement a Multilayer Perceptron for Multi classification
+## ALGORITHM :
+
+1. Import the necessary libraries of python.
+
+2. After that, create a list of attribute names in the dataset and use it in a call to the read_csv() function of the pandas library along with the name of the CSV file containing the dataset.
+
+3. Divide the dataset into two parts. While the first part contains the first four columns that we assign in the variable x. Likewise, the second part contains only the last column that is the class label. Further, assign it to the variable y.
+
+4. Call the train_test_split() function that further divides the dataset into training data and testing data with a testing data size of 20%.
+Normalize our dataset. 
+
+5. In order to do that we call the StandardScaler() function. Basically, the StandardScaler() function subtracts the mean from a feature and scales it to the unit variance.
+
+6. Invoke the MLPClassifier() function with appropriate parameters indicating the hidden layer sizes, activation function, and the maximum number of iterations.
+
+7. In order to get the predicted values we call the predict() function on the testing data set.
+
+8. Finally, call the functions confusion_matrix(), and the classification_report() in order to evaluate the performance of our classifier.
+
+## PROGRAM :
+```
+import pandas as pd
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
+names = ["Class", "Alcohol", "Malic_acid", "Ash", "Magnesium"]
+winedata = pd.read_csv(url, names=names, usecols=[0, 1, 2, 3, 5])
+print(winedata.head())
+x = winedata.iloc[:, 1:]   # features
+y = winedata["Class"]      # labels
+# Encode labels
+le = preprocessing.LabelEncoder()
+y_encoded = le.fit_transform(y)
+x_train, x_test, y_train, y_test = train_test_split(x, y_encoded, test_size=0.25, random_state=42)
+scaler = StandardScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)
+x_test = scaler.transform(x_test)
+mlp = MLPClassifier(hidden_layer_sizes=(10,10,10), max_iter=1000, random_state=42)
+mlp.fit(x_train, y_train)
+predictions = mlp.predict(x_test)
+predicted_classes = le.inverse_transform(predictions)
+# Confusion matrix
+print(confusion_matrix(y_test, predictions))
+# Classification report with proper class labels
+print(classification_report(y_test, predictions, target_names=[f"Wine-Class-{c}" for c in le.classes_]))
+```
+
+## OUTPUT :
+
+<img width="927" height="403" alt="image" src="https://github.com/user-attachments/assets/164f6720-d241-4a9a-bdc7-72761d8fc77d" />
+
+
+## RESULT :
+Thus, MLP is implemented for multi-classification using python.
+----------------------------------------------------------------------------------------------------------------------------
+## Implementation of XOR using RBF
+## Aim:
+To implement a XOR gate classification using Radial Basis Function Neural Network.
+# ALGORITHM:
+Step 1: Initialize the input vector for you bit binary data
+Step 2: Initialize the centers for two hidden neurons in hidden layer
+Step 3: Define the non- linear function for the hidden neurons using Gaussian RBF
+Step 4: Initialize the weights for the hidden neuron
+Step 5 : Determine the output function as Y=W1*φ1 +W1 *φ2
+Step 6: Test the network for accuracy
+Step 7: Plot the Input space and Hidden space of RBF NN for XOR classification.
+# program:
+```
+import numpy as np
+import matplotlib.pyplot as plt
+def gaussian_rbf(x, landmark, gamma=1):
+    return np.exp(-gamma * np.linalg.norm(x - landmark)**2)
+def end_to_end(X1, X2, ys, mu1, mu2):
+    from_1 = [gaussian_rbf(np.array([X1[i], X2[i]]), mu1) for i in range(len(X1))]
+    from_2 = [gaussian_rbf(np.array([X1[i], X2[i]]), mu2) for i in range(len(X1))]
+    plt.figure(figsize=(13, 5))
+    plt.subplot(1, 2, 1)
+    plt.scatter((X1[0], X1[3]), (X2[0], X2[3]), label="Class_0")
+    plt.scatter((X1[1], X1[2]), (X2[1], X2[2]), label="Class_1")
+    plt.xlabel("$X1$", fontsize=15)
+    plt.ylabel("$X2$", fontsize=15)
+    plt.title("Xor: Linearly Inseparable", fontsize=15)
+    plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.scatter(from_1[0], from_2[0], label="Class_0")
+    plt.scatter(from_1[1], from_2[1], label="Class_1")
+    plt.scatter(from_1[2], from_2[2], label="Class_1")
+    plt.scatter(from_1[3], from_2[3], label="Class_0")
+    plt.plot([0, 0.95], [0.95, 0], "k--")
+    plt.annotate("Seperating hyperplane", xy=(0.4, 0.55), xytext=(0.55, 0.66),
+                arrowprops=dict(facecolor='black', shrink=0.05))
+    plt.xlabel(f"$mu1$: {(mu1)}", fontsize=15)
+    plt.ylabel(f"$mu2$: {(mu2)}", fontsize=15)
+    plt.title("Transformed Inputs: Linearly Seperable", fontsize=15)
+    plt.legend()
+    A = []
+    for i, j in zip(from_1, from_2):
+        temp = []
+        temp.append(i)
+        temp.append(j)
+        temp.append(1)
+        A.append(temp)
+    A = np.array(A)
+    W = np.linalg.inv(A.T.dot(A)).dot(A.T).dot(ys)
+    print(np.round(A.dot(W)))
+    print(ys)
+    print(f"Weights: {W}")
+    return W
+
+def predict_matrix(point, weights):
+    gaussian_rbf_0 = gaussian_rbf(point, mu1)
+    gaussian_rbf_1 = gaussian_rbf(point, mu2)
+    A = np.array([gaussian_rbf_0, gaussian_rbf_1, 1])
+    return np.round(A.dot(weights))
+# points
+x1 = np.array([0, 0, 1, 1])
+x2 = np.array([0, 1, 0, 1])
+ys = np.array([0, 1, 1, 0])
+# centers
+mu1 = np.array([0, 1])
+mu2 = np.array([1, 0])
+w = end_to_end(x1, x2, ys, mu1, mu2)
+# testing
+print(f"Input:{np.array([0, 0])}, Predicted: {predict_matrix(np.array([0, 0]), w)}")
+print(f"Input:{np.array([0, 1])}, Predicted: {predict_matrix(np.array([0, 1]), w)}")
+print(f"Input:{np.array([1, 0])}, Predicted: {predict_matrix(np.array([1, 0]), w)}")
+print(f"Input:{np.array([1, 1])}, Predicted: {predict_matrix(np.array([1, 1]), w)}")
+```
+# output
+![image](https://github.com/PriyankaAnnadurai/Ex-5--NN/assets/118351569/47320894-3338-47af-bf16-0e5210ce8844)
+
+# Result:
+Thus , a Radial Basis Function Neural Network is implemented to classify XOR data.
